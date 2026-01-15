@@ -388,17 +388,12 @@ const WelcomeScreen = ({ onStart }: { onStart: () => void }) => {
 
         <div className="space-y-4">
             <h1 className="text-4xl md:text-7xl font-serif text-white tracking-tight drop-shadow-lg">Tafsir Finder</h1>
-            <div className="flex items-center justify-center gap-3">
-                <div className="h-[1px] w-8 bg-emerald-500/50"></div>
-                <p className="text-emerald-400/80 font-serif tracking-widest uppercase text-xs font-semibold">Tafsir Maudhu'i Lengkap</p>
-                <div className="h-[1px] w-8 bg-emerald-500/50"></div>
-            </div>
         </div>
         
         <p className="text-emerald-100/70 font-sans font-light leading-relaxed text-sm md:text-base px-4">
-          Koleksi lengkap 100+ Tema Tafsir berdasarkan Intisari Ibnu Katsir.
+          Tafsir Maudhu'i berdasarkan Intisari Tafsir Ibnu Katsir.
           <br/>
-          <span className="text-emerald-500/50 text-xs mt-2 block">(Offline Database v3.0)</span>
+          <span className="text-emerald-500/50 text-xs mt-2 block">(Offline Database)</span>
         </p>
 
         <button 
