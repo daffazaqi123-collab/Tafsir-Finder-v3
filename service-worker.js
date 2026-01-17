@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finding-tafsir-v1';
+const CACHE_NAME = 'finding-tafsir-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
@@ -6,7 +6,7 @@ const PRECACHE_ASSETS = [
   '/manifest.json'
 ];
 
-// Install Event: Cache core files immediately
+// Install: Cache core files
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -15,39 +15,45 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate Event: Take control immediately
+// Activate: Clean up old caches if any
 self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-// Fetch Event: Network first, fallback to cache, but cache new successful requests (Runtime Caching)
+// Fetch: Strategy for "Offline Total"
 self.addEventListener('fetch', (event) => {
+  // 1. Navigation Requests (HTML): Try Network, Fallback to Cache, Fallback to /index.html
+  // This ensures if you open the app offline, it loads the main page instead of 404.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          return caches.match(event.request)
+            .then((cachedResponse) => {
+              if (cachedResponse) return cachedResponse;
+              // CRITICAL FIX: If navigation fails, return the main index.html
+              return caches.match('/index.html');
+            });
+        })
+    );
+    return;
+  }
+
+  // 2. Asset Requests (JS, CSS, Images): Cache First, then Network (and update cache)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      // Return cached response if found
       if (cachedResponse) {
         return cachedResponse;
       }
-
-      // If not in cache, fetch from network
       return fetch(event.request).then((networkResponse) => {
-        // Check if we received a valid response
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic' && networkResponse.type !== 'cors') {
-          return networkResponse;
+        // Cache valid responses for next time (e.g., React from esm.sh)
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic' || networkResponse.type === 'cors') {
+           const responseToCache = networkResponse.clone();
+           caches.open(CACHE_NAME).then((cache) => {
+             cache.put(event.request, responseToCache);
+           });
         }
-
-        // Clone the response because it's a stream and can only be consumed once
-        const responseToCache = networkResponse.clone();
-
-        // Cache the new resource (like react from esm.sh) for next time
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-
         return networkResponse;
-      }).catch(() => {
-        // Fallback logic for when offline and not in cache
-        // e.g. return a custom offline page if navigating to a new page
       });
     })
   );
