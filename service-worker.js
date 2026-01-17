@@ -1,9 +1,10 @@
-const CACHE_NAME = 'finding-tafsir-v2';
+const CACHE_NAME = 'finding-tafsir-v3';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/index.tsx',
-  '/manifest.json'
+  '/manifest.json',
+  '/icon.svg'
 ];
 
 // Install: Cache core files
